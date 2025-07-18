@@ -1,0 +1,103 @@
+/* .roboto-<uniquifier> {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+} */
+
+
+.linear-loader-wrapper {
+  position: relative;
+  height: 4px;
+  background-color: #e0e0e0;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.linear-loader-bar {
+  position: absolute;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335);
+  animation: slide 1.2s infinite ease-in-out;
+  border-radius: 2px;
+}
+
+@keyframes slide {
+  0% {
+    left: -40%;
+  }
+  50% {
+    left: 50%;
+    width: 60%;
+  }
+  100% {
+    left: 100%;
+    width: 40%;
+  }
+}
+
+
+
+/* For Spinner */
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.spinner {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #4285f4, #a160e6, #ea4335);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+
+  animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 6px #a160e6);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+.greeting {
+  font-size: 2.5rem;
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+}
+
+.hello {
+  background: linear-gradient(to right, #4285f4, #a160e6); /* blue to purple */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.name {
+  background: linear-gradient(to right, #a160e6, #ea4335); /* purple to red */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.hello:hover,
+.name:hover {
+  text-shadow: 0 0 8px rgba(161, 96, 230, 0.7);
+  cursor: default;
+}
