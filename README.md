@@ -100,16 +100,16 @@ export default tseslint.config({
 
 # 1. Create and switch to the new branch
 
-git checkout -b nlp-pipeline
+git checkout -b virtual-assistance
 
 # 2. Now you're on nlp-pipeline branch. Just add and commit your changes:
 
 git add .
-git commit -m "Initial commit for NLP pipeline"
+git commit -m "Integrate TasteGpt virtual assitant"
 
 # 3. Push the branch to remote
 
-git push origin nlp-pipeline
+git push origin virtual-assistance
 
 # 4. Switch back to the main branch
 
@@ -121,7 +121,7 @@ git pull origin main
 
 # 6. Merge the changes from nlp-pipeline into main
 
-git merge nlp-pipeline
+git merge virtual-assistance
 
 # 7.
 

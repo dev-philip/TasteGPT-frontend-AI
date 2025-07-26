@@ -18,6 +18,7 @@ import axios from "axios";
 import { useChatStore } from "@/store/useChatStore";
 import { useAuthStore } from "@/store/auth";
 import { VITE_API_BASE_URL} from "@/utils/constants";
+import { PromptChat } from "./prompt-chat";
 
 export const PromptResult: React.FC = () => {
     const API_BASE_URL = VITE_API_BASE_URL;
@@ -229,7 +230,7 @@ const handleTypingFinished = async (index: number, message: string) => {
 
 const greetingHTML = isAuthenticated
   ? `<h1 class="${styles.greeting}"><span class="${styles.hello}">Hello, </span><span class="${styles.name}">${user?.name}.</span></h1>`
-  : `<h1 class="${styles.greeting}"><span class="${styles.hello}">Hello, </span><span class="${styles.name}">Bio Hackathon.</span></h1>`;
+  : `<h1 class="${styles.greeting}"><span class="${styles.hello}">Hi, </span><span class="${styles.name}">What’s your vibe today?</span></h1>`;
 
   return (
     <>
@@ -325,6 +326,10 @@ const greetingHTML = isAuthenticated
                 {/* Invisible scroll target */}
                 {/* <div className={styles.stayAtButtom} ref={bottomRef} /> */}
               </div>
+
+          <div className="h-full">
+            <PromptChat />
+          </div>
 
           <div className="flex flex-roe justify-evenly gap-4 items-center">
             <Interaction onClick={handleAudioClick} className="flex flex-col items-center gap-1">

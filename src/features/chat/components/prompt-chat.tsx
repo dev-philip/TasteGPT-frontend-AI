@@ -50,7 +50,7 @@ export const PromptChat: React.FC = () => {
             key={message.id}
             message={message.content}
             namePosition={message.isSystem ? "left" : "right"}
-            senderName={message.isSystem ? "Bio AI" : "You"}
+            senderName={message.isSystem ? "TasteGPT" : "You"}
           />
         ))}
       </div>

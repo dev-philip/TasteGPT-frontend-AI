@@ -7,16 +7,14 @@ import { useModelStore } from "@/store/useModelStore";
 import { useAuthStore } from "@/store/auth";
 import { useClaimStore } from "@/store/useClaimStore";
 import { useChatStore } from "@/store/useChatStore";
-import { VITE_API_BASE_URL} from "@/utils/constants";
+import { VITE_API_BASE_URL, MS_SUBSCRIPTION_KEY, MS_SUBSCRIPTION_REGION} from "@/utils/constants";
+import EyeIcon from "@/assets/images/svg/eye.svg";
+import { toast } from "react-toastify";
 
-const options = ["gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"];
+// import FemaleSpeakers from "@/utils/emaleSpeakers";
 
-// const history = [
-//   "Judging Creative Onchain Hackathon",
-//   "Valora vs Traditional Banks",
-// ];
-
-// const previous = ["Bacteriology overview"];
+import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
+import Aibot from '@/components/AI-bot/Aibot';
 
 export const ChatRightPanel: React.FC = () => {
   const API_BASE_URL = VITE_API_BASE_URL;
@@ -28,7 +26,7 @@ export const ChatRightPanel: React.FC = () => {
   // const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
    const { user, isAuthenticated } = useAuthStore();
 
-  const { selectedModel, setSelectedModel } = useModelStore();
+
 
   // const createNewChat = () => {
   //   alert("New Chat");
@@ -87,32 +85,81 @@ claimHistory.forEach((entry:any) => {
 });
 
 
+  
+    // define the states
+    var visemes_arr:any = []; 
+    const [imageIndex,setImageIndex] = useState(0);
+    const [selectedVoice, setSelectedVoice] = useState("en-Us-JennyNeural");
+    const [sentence, setSelectedSentence] = useState("Hi! I am your servicenow virtual friend");
+    
+
+    const sentences = [
+      "hello, My name is Sarah. I will be your servicenow Representative today. What Accelerators are you looking for",
+      "hakuna matata",
+      "a friend in need is a friend in deed",
+      " ActiveCampaign is a powerful customer experience automation platform that helps businesses of all sizes optimize their customer journeys. It offers a suite of tools including email marketing, marketing automation, sales CRM, and messaging. It also integrates with over 150 apps and platforms to streamline workflows and enhance user experience."
+     ];
+
+  const handleEyeBtnClick = () => {
+    toast.success("Show/hide bar");
+     synthesizeSpeech(selectedVoice, sentences[0]);
+  };
+
+     function synthesizeSpeech(selectedVoice: any, sentence: any){
+          const speechConfig = sdk.SpeechConfig.fromSubscription(MS_SUBSCRIPTION_KEY, MS_SUBSCRIPTION_REGION);
+          const speechSynthesizer = new sdk.SpeechSynthesizer(speechConfig);
+      
+          const ssml = `<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'> \r\n \
+                            <voice name='${selectedVoice}'> \r\n \
+                                <mstts:viseme type='redlips_front'/> \r\n \
+                                ${sentence} \r\n \
+                            </voice> \r\n \
+                        </speak>`;
+
+            // Subscribes to viseme received event
+            speechSynthesizer.visemeReceived = function (s, e) {
+              // window.console.log("(Viseme), Audio offset: " + e.audioOffset / 10000 + "ms. Viseme ID: " + e.visemeId);
+
+              visemes_arr.push(e);
+            }
+
+              speechSynthesizer.speakSsmlAsync(
+                  ssml,
+                  result => {
+                      if (result.errorDetails) {
+                          console.error(result.errorDetails);
+                      } else {
+                          console.log(JSON.stringify(result));
+                          visemes_arr.forEach((e:any)=>{
+                            var duration = (e.audioOffset)/10000;
+                            setTimeout(()=>{setImageIndex(e.visemeId);},duration);
+                          })
+                          
+                      }
+          
+                      visemes_arr = [];
+                      speechSynthesizer.close();
+                  },
+                  error => {
+                      console.log(error);
+                      visemes_arr = [];
+                      speechSynthesizer.close();
+                  });
+    }
+
+
   return (
     <div>
       <div className="w-[300px] bg-surface-light dark:bg-surface-dark rounded-[12px] p-4">
-        <p className="mb-2 text-text-light/40 dark:text-text-dark/10 text-base">
-          Open AI Models
+        <Interaction>
+            <EyeIcon onClick={handleEyeBtnClick}  />
+        </Interaction>
+        <p className="mb-2 text-text-light/40 dark:text-text-dark/10 text-base text-center font-semibold">
+          Virtual Assistant
         </p>
 
-        <div>
-          {options.map((option) => (
-            <div
-              key={`llm-${option}`}
-              onClick={() => setSelectedModel(option)}
-              className={classNames(
-                "transition-all duration-200 cursor-pointer w-full px-4 py-3 rounded-[12px]",
-                "hover:bg-surface-1-light hover:dark:bg-surface-1-dark",
-                {
-                  "bg-surface-1-light dark:bg-surface-1-dark": selectedModel === option,
-                }
-              )}
-            >
-              <p className="uppercase text-text-light/70 dark:text-text-dark/40 text-sm">
-                {option}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* Avater Comes here */}
+        <Aibot imageIndex = {imageIndex} />
       </div>
 
       <div className="mt-8">

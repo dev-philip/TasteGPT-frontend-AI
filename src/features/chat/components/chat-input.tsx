@@ -12,6 +12,10 @@ import { useClaimStore } from "@/store/useClaimStore";
 import { useChatStore } from "@/store/useChatStore";
 import { useAuthStore } from "@/store/auth";
 import { VITE_API_BASE_URL} from "@/utils/constants";
+import AddIcon from "@/assets/images/svg/add-circle.svg";
+import { useRef } from "react";
+import { toast } from "react-toastify";
+import MicIcon from "@/assets/images/svg/microphone-2.svg";
 
 
 type ChatInputProps = {
@@ -39,70 +43,182 @@ const setPrevClaim = useClaimStore((state) => state.setPrevClaim);
     const trimmed_claim = claim.trim();
     if (!trimmed_claim) return false;
 
-    setIsClaimLoading(true);
+    // setIsClaimLoading(true);
     setPrevClaim(trimmed_claim);
     addMessage({
         content: trimmed_claim,
         isSystem: false,
     });
-      setClaim("");
+
+    //  addMessage({
+    //     content: "trimmed_claim",
+    //     isSystem: true,
+    // });
+    
+    setClaim("");
     console.log(selectedModel + isAuthenticated + " " + user?.id );
 
-    // const response = await axios.post(`${API_BASE_URL}/engine/null-verifier`
-    try {
-
-      let bodyInfo =   {
-        claim: trimmed_claim,
-        // claim: "Inflammation and protects neuronal cells in Alzheimer's disease",
-        model: selectedModel,
-        loggedIn: isAuthenticated,
-        sessionId: user?.id
-        // loggedIn: false,
-        // sessionId: null
-      }
-      const response = await axios.post(`${API_BASE_URL}/engine/null-verifier`, bodyInfo);
-
-      console.log(bodyInfo);
-      console.log("Cleaned response:", response.data);
-
-      // simulate loading
-      // setTimeout(() => setIsClaimLoading(false), 3000);
-
-      setClaimData(response.data)
-      setClaimDataForChat(claim, response.data)
+      setClaimData("response.data")
+      setClaimDataForChat(claim, "response.data")
       onSend?.(trimmed_claim);
+
+    // const response = await axios.post(`${API_BASE_URL}/engine/null-verifier`
+    // try {
+
+    //   let bodyInfo =   {
+    //     claim: trimmed_claim,
+    //     // claim: "Inflammation and protects neuronal cells in Alzheimer's disease",
+    //     model: selectedModel,
+    //     loggedIn: isAuthenticated,
+    //     sessionId: user?.id
+    //     // loggedIn: false,
+    //     // sessionId: null
+    //   }
+    //   const response = await axios.post(`${API_BASE_URL}/engine/null-verifier`, bodyInfo);
+
+    //   console.log(bodyInfo);
+    //   console.log("Cleaned response:", response.data);
+
+    //   // simulate loading
+    //   // setTimeout(() => setIsClaimLoading(false), 3000);
+
+    //   setClaimData(response.data)
+    //   setClaimDataForChat(claim, response.data)
+    //   onSend?.(trimmed_claim);
     
+    // } catch (error) {
+    //   console.error("Error sending request:", error);
+    //   alert("Failed to send the request.");
+    // }finally {
+    //   // Always executed regardless of success or failure
+    //   setIsClaimLoading(false);
+    // }
+  };
+
+/************* Select a document functionality ***********/
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadButtonClick = () => {
+    fileInputRef.current?.click(); // Trigger hidden file input
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Olamide", API_BASE_URL);
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    console.log("Selected file:", file);
+
+    const formData = new FormData();
+    formData.append("file", file); // `file` should match the parameter name in FastAPI
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/nlp/extract-text`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Extracted text:", response.data);
+      setClaim(response.data.extracted_text);
+      // You can also toast or display the response here
     } catch (error) {
-      console.error("Error sending request:", error);
-      alert("Failed to send the request.");
-    }finally {
-      // Always executed regardless of success or failure
-      setIsClaimLoading(false);
+      console.error("Upload error:", error);
+      toast.success("Failed to upload the file.");
     }
+  };
+  
+/************* End of  a document functionality ***********/
+
+const isListening = useClaimStore((state) => state.isListening);
+const setIsListening = useClaimStore((state) => state.setIsListening);
+
+  const handleTextToSpeech = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+          const recognition = new SpeechRecognition();
+          recognition.interimResults = true;
+
+          recognition.addEventListener("start", () => {
+              // When listening starts
+              setIsListening(true);
+          });
+
+          recognition.addEventListener("end", () => {
+              // When listening stops
+              setIsListening(false);
+          });
+
+          recognition.addEventListener("result", (e:any) => {
+              const transcript = Array.from(e.results)
+                  .map((result:any) => result[0])
+                  .map((result) => result.transcript)
+                  .join("");
+
+              // Update the input field with the transcript
+              setClaim(transcript);
+              console.log(transcript);
+          });
+
+          recognition.start();
+      } else {
+          alert("Your browser does not support Speech Recognition.");
+      }
   };
 
   return (
     <div className="w-full bg-surface-light dark:bg-surface-dark rounded-[40px]">
       <div className="flex flex-row items-start px-4 py-2">
-        <TextareaAutosize
-          value={claim}
-          onChange={(e) => setClaim(e.target.value)}
-          className={`${styles.scrollbar} flex-1 text-sm bg-transparent outline-none resize-none placeholder:text-text-light/40 dark:placeholder:text-text-dark/20 text-text-light dark:text-text-dark leading-snug`}
-          placeholder="Ask anything"
-          minRows={1}
-          maxRows={5}
-        />
-
-       <Interaction
-          onClick={handleSend}
-          title="Send Claim"
-          disabled={isClaimLoading}
-          className={`rounded-full bg-white flex items-center justify-center mt-1 transition-opacity ${
-            isClaimLoading ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"
-          }`}
-        >
-          <SendIcon />
+        <Interaction>
+          <AddIcon onClick={handleUploadButtonClick} 
+              className="text-black dark:text-[#292D32]" 
+              />
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+          />
         </Interaction>
+          
+          {isListening ? (
+                <div title="Actively Listening">
+                  <Interaction>
+                      <MicIcon className="animate-pulse" />
+                  </Interaction>
+                </div>
+          ) : (
+                <div title="Click to Listen">
+                  <Interaction>
+                    <MicIcon onClick={handleTextToSpeech} />
+                  </Interaction>
+                </div>
+            )
+            }
+          <TextareaAutosize
+            value={claim}
+            onChange={(e) => setClaim(e.target.value)}
+            className={`${styles.scrollbar} flex-1 text-sm bg-transparent outline-none resize-none placeholder:text-text-light/40 dark:placeholder:text-text-dark/20 text-text-light dark:text-text-dark leading-snug`}
+            placeholder="Ask anything"
+            minRows={1}
+            maxRows={5}
+          />
+
+        <Interaction
+            onClick={handleSend}
+            title="Send Claim"
+            disabled={isClaimLoading}
+            className={`rounded-full bg-white flex items-center justify-center mt-1 transition-opacity ${
+              isClaimLoading ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"
+            }`}
+          >
+            <SendIcon />
+          </Interaction>
       </div>
     </div>
   );

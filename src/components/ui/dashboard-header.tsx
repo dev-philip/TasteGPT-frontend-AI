@@ -63,7 +63,7 @@ export const DashboardHeader = () => {
             {/** Title? TODO: Clarify what this is from designer or timi */}
             <motion.div className="flex-1" variants={itemVariants}>
               <p className="text-text-light/70 dark:text-text-dark/70 text-sm text-center">
-                Judging Creative Onchain Hackathon
+                TasteGPT – The Cultural Concierge
               </p>
             </motion.div>
 
